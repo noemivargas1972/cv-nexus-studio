@@ -1,21 +1,623 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Creador de CV por Voz, Foto y Estilos Elegantes</title>
-    <meta name="description" content="Crea y personaliza currículums profesionales con dictado por voz, captura de foto en vivo y paletas de colores suaves y armoniosas." />
-    <meta property="og:title" content="Creador de CV por Voz, Foto y Estilos Elegantes" />
-    <meta property="og:description" content="Crea y personaliza currículums profesionales con dictado por voz, captura de foto en vivo y paletas de colores suaves y armoniosas." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-neutral-50 text-neutral-900 antialiased selection:bg-slate-200 selection:text-slate-900">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Nexus Studio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #1e3a8a;
+      --bg-app: #f8fafc;
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+      --text-main: #1e293b;
+    }
 
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      margin: 0;
+      padding: 12px;
+    }
+
+    .app-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 850px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-section {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .preview-section {
+      background: #e2e8f0;
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .app-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .app-title h1 {
+      font-size: 20px;
+      margin: 0;
+      color: var(--primary-color);
+    }
+
+    /* BANNER DE PAGO */
+    .pago-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .btn-mp {
+      background: #009ee3;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .aviso-pago-ok {
+      display: none;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    /* GRUPOS DE CAMPOS */
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 4px;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    input[type="text"], input[type="email"], textarea, select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    textarea { resize: vertical; min-height: 55px; }
+
+    .btn-mic {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-mic.listening {
+      background: #22c55e;
+    }
+
+    /* MÓDULO DE FOTO */
+    .photo-box {
+      background: #f1f5f9;
+      border: 2px dashed #cbd5e1;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    #videoCam { width: 100%; max-width: 150px; border-radius: 8px; display: none; margin: 8px auto; }
+    #previewFoto { width: 85px; height: 85px; object-fit: cover; margin: 8px auto; display: block; }
+    .shape-circle { border-radius: 50%; }
+    .shape-square { border-radius: 8px; }
+    .shape-rect { border-radius: 2px; width: 85px; height: 105px !important; }
+
+    .btn-action {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    /* ESTILOS DE LA HOJA DE CV PREVIA */
+    .cv-paper {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* MARCA DE AGUA EN DIAGONAL */
+    .cv-paper.con-marca::after {
+      content: "MUESTRA GRATUITA - CV NEXUS STUDIO";
+      position: absolute;
+      top: 42%;
+      left: -25%;
+      width: 150%;
+      color: rgba(220, 38, 38, 0.16);
+      font-size: 24px;
+      font-weight: bold;
+      transform: rotate(-30deg);
+      pointer-events: none;
+      text-align: center;
+      z-index: 99;
+    }
+
+    .cv-header-box {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .cv-header-box img {
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
+    }
+
+    .cv-header-text h2 { margin: 0; font-size: 18px; color: var(--primary-color); }
+    .cv-header-text h4 { margin: 2px 0; font-size: 12px; color: #475569; }
+    .cv-header-text p { margin: 1px 0; font-size: 11px; color: #64748b; }
+
+    .cv-sec-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: var(--primary-color);
+      border-bottom: 1px solid #e2e8f0;
+      margin: 10px 0 4px 0;
+      padding-bottom: 2px;
+    }
+
+    .cv-sec-body {
+      font-size: 11px;
+      line-height: 1.4;
+      color: #334155;
+      white-space: pre-line;
+      margin: 0;
+    }
+
+    /* BARRA DE EXPORTACIÓN */
+    .export-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-exp {
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-exp-img { background: #10b981; }
+    .btn-exp-pdf { background: #0284c7; }
+    .btn-exp-wsp { background: #25d366; }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- COLUMNA 1: FORMULARIO DETALLADO -->
+  <div class="form-section">
+    <div class="app-title">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+      <div>
+        <h1>CV Nexus Studio</h1>
+        <small style="color:#64748b;">Completá los campos o usá el micrófono para dictar</small>
+      </div>
+    </div>
+
+    <!-- BANNER DE MONETIZACIÓN -->
+    <div id="pagoBanner" class="pago-banner">
+      <div style="font-size:12px; color:#1e40af;">🔓 La previsualización incluye marca de agua. Aboná <strong>$1.000 ARS</strong> para habilitar descargas limpias.</div>
+      <button class="btn-mp" onclick="irAPagar()">💳 Pagar $1.000 por Mercado Pago</button>
+    </div>
+
+    <div id="avisoPagoOk" class="aviso-pago-ok">
+      ✅ ¡Pago Confirmado! Se removió la marca de agua y las descargas están listas.
+    </div>
+
+    <!-- CONFIGURACIÓN DE FOTO -->
+    <div class="photo-box">
+      <label style="font-weight:bold; font-size:12px;">📷 Foto de Perfil</label>
+      <video id="videoCam" autoplay playsinline></video>
+      <img id="previewFoto" class="shape-circle" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><circle cx='40' cy='40' r='40' fill='%23cbd5e1'/></svg>" alt="Foto">
+      <canvas id="canvasCam" style="display:none;"></canvas>
+      
+      <div style="display:flex; gap:6px; margin-top:6px;">
+        <button class="btn-action" id="btnCam" onclick="iniciarCamara()">📷 Encender Cámara</button>
+        <button class="btn-action" id="btnCap" onclick="tomarFoto()" style="display:none; background:#d97706;">📸 Tomar Foto</button>
+      </div>
+
+      <div style="margin-top:8px; display:flex; gap:8px; align-items:center; justify-content:center;">
+        <label style="font-size:11px; margin:0;">Formato del Marco:</label>
+        <select id="selFormatoFoto" style="width:auto; padding:4px;" onchange="actualizarEstiloFoto()">
+          <option value="shape-circle">Redonda</option>
+          <option value="shape-square">Cuadrada</option>
+          <option value="shape-rect">Rectangular</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CONFIGURACIÓN DE COLORES -->
+    <div class="field-group" style="background:#f1f5f9; padding:8px; border-radius:6px;">
+      <label>🎨 Estilo y Color del CV</label>
+      <select id="selColor" onchange="cambiarColorTema()">
+        <option value="#1e3a8a">Azul Corporativo</option>
+        <option value="#0f766e">Verde Petróleo</option>
+        <option value="#b91c1c">Rojo Ejecutivo</option>
+        <option value="#4338ca">Índigo Moderno</option>
+        <option value="#334155">Gris Oscuro Elegante</option>
+      </select>
+    </div>
+
+    <!-- CAMPOS FORMULARIO INDIVIDUALES -->
+    <div class="field-group">
+      <label>Nombre y Apellido</label>
+      <div class="field-row">
+        <input type="text" id="inNombre" placeholder="Ej: Noemí Vargas" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inNombre', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>DNI / Documento</label>
+      <div class="field-row">
+        <input type="text" id="inDni" placeholder="Ej: 23.456.789" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inDni', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Puesto Objetivo / Titular</label>
+      <div class="field-row">
+        <input type="text" id="inPuesto" placeholder="Ej: Supervisora Logística / Atención al Cliente" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inPuesto', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Teléfono de Contacto</label>
+      <div class="field-row">
+        <input type="text" id="inTel" placeholder="Ej: +54 11 1234-5678" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inTel', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Correo Electrónico</label>
+      <div class="field-row">
+        <input type="email" id="inEmail" placeholder="Ej: correo@ejemplo.com" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inEmail', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Dirección / Ciudad / Barrio</label>
+      <div class="field-row">
+        <input type="text" id="inDir" placeholder="Ej: CABA, Buenos Aires" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inDir', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Fecha de Nacimiento / Nacionalidad / Estado Civil</label>
+      <div class="field-row">
+        <input type="text" id="inDatosPers" placeholder="Ej: 14/10/1972 | Argentina | Soltera" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inDatosPers', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Sobre Mí / Perfil Profesional</label>
+      <div class="field-row">
+        <textarea id="inSobreMi" placeholder="Dictá o escribí un resumen breve sobre tus fortalezas..." oninput="sincronizar()"></textarea>
+        <button class="btn-mic" onclick="toggleDictado('inSobreMi', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Experiencia Laboral</label>
+      <div class="field-row">
+        <textarea id="inExp" placeholder="Detallá puestos, empresas, fechas y tareas desempeñadas..." oninput="sincronizar()"></textarea>
+        <button class="btn-mic" onclick="toggleDictado('inExp', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Educación y Cursos</label>
+      <div class="field-row">
+        <textarea id="inEdu" placeholder="Estudios secundarios, terciarios o capacitaciones..." oninput="sincronizar()"></textarea>
+        <button class="btn-mic" onclick="toggleDictado('inEdu', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Habilidades y Manejo de Herramientas</label>
+      <div class="field-row">
+        <input type="text" id="inHab" placeholder="Ej: Manejo de Caja, Excel, Atención B2B, Sistemas POS" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inHab', this)">🎙️</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Referencias Laborales</label>
+      <div class="field-row">
+        <input type="text" id="inRef" placeholder="Ej: Nombre del supervisor - Teléfono" oninput="sincronizar()">
+        <button class="btn-mic" onclick="toggleDictado('inRef', this)">🎙️</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COLUMNA 2: VISTA PREVIA Y EXPORTACIÓN -->
+  <div class="preview-section">
+    <div style="font-size:12px; font-weight:bold; color:#475569; margin-bottom:8px;">VISTA PREVIA EN TIEMPO REAL</div>
+    
+    <div class="cv-paper con-marca" id="hojaCv">
+      <div class="cv-header-box" id="cvHeader">
+        <img id="cvFoto" class="shape-circle" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='85' height='85'><circle cx='42' cy='42' r='42' fill='%23cbd5e1'/></svg>" alt="Foto">
+        <div class="cv-header-text">
+          <h2 id="outNombre">Nombre y Apellido</h2>
+          <h4 id="outPuesto">Puesto / Titular</h4>
+          <p id="outContacto">Teléfono | Correo | Ubicación</p>
+          <p id="outPers">DNI | Datos Personales</p>
+        </div>
+      </div>
+
+      <div class="cv-sec-title">Perfil Profesional</div>
+      <p class="cv-sec-body" id="outSobreMi">Resumen de perfil...</p>
+
+      <div class="cv-sec-title">Experiencia Laboral</div>
+      <p class="cv-sec-body" id="outExp">Detalle de empleos...</p>
+
+      <div class="cv-sec-title">Educación y Cursos</div>
+      <p class="cv-sec-body" id="outEdu">Formación académica...</p>
+
+      <div class="cv-sec-title">Habilidades</div>
+      <p class="cv-sec-body" id="outHab">Conocimientos técnicos y habilidades...</p>
+
+      <div class="cv-sec-title">Referencias</div>
+      <p class="cv-sec-body" id="outRef">Referencias personales / laborales...</p>
+    </div>
+
+    <div class="export-btns">
+      <button class="btn-exp btn-exp-img" onclick="guardarImagen()">💾 Guardar Imagen (JPG)</button>
+      <button class="btn-exp btn-exp-pdf" onclick="guardarPDF()">📄 Descargar PDF</button>
+      <a id="btnWsp" href="#" target="_blank" class="btn-exp btn-exp-wsp" onclick="prepararWhatsApp()">💬 Enviar por WhatsApp</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let fotoUrl = "";
+  let streamVideo = null;
+
+  // DETECTAR PAGO EN URL
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const estado = params.get('pago') || params.get('collection_status');
+    if (estado === 'aprobado' || estado === 'approved') {
+      document.getElementById('hojaCv').classList.remove('con-marca');
+      document.getElementById('pagoBanner').style.display = 'none';
+      document.getElementById('avisoPagoOk').style.display = 'block';
+    }
+  });
+
+  function irAPagar() {
+    // REEMPLAZAR ESTE ENLACE POR TU LINK REAL DE MERCADO PAGO
+    window.location.href = "https://mpago.li/1YZVG9u";
+  }
+
+  function cambiarColorTema() {
+    const col = document.getElementById('selColor').value;
+    document.documentElement.style.setProperty('--primary-color', col);
+    document.getElementById('cvHeader').style.borderColor = col;
+    document.getElementById('cvFoto').style.borderColor = col;
+  }
+
+  function actualizarEstiloFoto() {
+    const formato = document.getElementById('selFormatoFoto').value;
+    const imgPrev = document.getElementById('previewFoto');
+    const imgCv = document.getElementById('cvFoto');
+    
+    imgPrev.className = formato;
+    imgCv.className = formato;
+  }
+
+  async function iniciarCamara() {
+    try {
+      const video = document.getElementById('videoCam');
+      streamVideo = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = streamVideo;
+      video.style.display = 'block';
+      document.getElementById('previewFoto').style.display = 'none';
+      document.getElementById('btnCam').style.display = 'none';
+      document.getElementById('btnCap').style.display = 'block';
+    } catch (e) { alert("Permití el acceso a la cámara para tomar la foto."); }
+  }
+
+  function tomarFoto() {
+    const video = document.getElementById('videoCam');
+    const canvas = document.getElementById('canvasCam');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    fotoUrl = canvas.toDataURL('image/jpeg', 0.9);
+    document.getElementById('previewFoto').src = fotoUrl;
+    document.getElementById('cvFoto').src = fotoUrl;
+    
+    document.getElementById('previewFoto').style.display = 'block';
+    video.style.display = 'none';
+    if (streamVideo) streamVideo.getTracks().forEach(t => t.stop());
+    
+    document.getElementById('btnCap').style.display = 'none';
+    document.getElementById('btnCam').style.display = 'block';
+    document.getElementById('btnCam').innerText = "🔄 Cambiar Foto";
+  }
+
+  // DICTADO POR VOZ
+  let recs = {}, activo = null;
+  function toggleDictado(id, btn) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert("Usa Google Chrome para dictar por voz."); return; }
+    
+    if (activo === id) { recs[id].stop(); activo = null; btn.classList.remove('listening'); btn.innerText = '🎙️'; return; }
+    if (activo && recs[activo]) { recs[activo].stop(); document.querySelectorAll('.btn-mic').forEach(b => { b.classList.remove('listening'); b.innerText = '🎙️'; }); }
+    
+    const r = new SR(); r.lang = 'es-AR'; r.continuous = true; r.interimResults = true;
+    const target = document.getElementById(id); let valIni = target.value;
+    
+    r.onresult = (e) => {
+      let t = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) { t += e.results[i][0].transcript; }
+      target.value = (valIni ? valIni + ' ' : '') + t;
+      sincronizar();
+    };
+    r.onend = () => { if (activo === id) { btn.classList.remove('listening'); btn.innerText = '🎙️'; activo = null; } };
+    r.start(); recs[id] = r; activo = id; btn.classList.add('listening'); btn.innerText = '⏹️';
+  }
+
+  // SINCRONIZACIÓN EN VIVO
+  function sincronizar() {
+    document.getElementById('outNombre').innerText = document.getElementById('inNombre').value.trim() || "Nombre y Apellido";
+    document.getElementById('outPuesto').innerText = document.getElementById('inPuesto').value.trim() || "Puesto / Titular";
+    
+    const tel = document.getElementById('inTel').value.trim();
+    const email = document.getElementById('inEmail').value.trim();
+    const dir = document.getElementById('inDir').value.trim();
+    document.getElementById('outContacto').innerText = [tel, email, dir].filter(Boolean).join(" | ") || "Teléfono | Correo | Ubicación";
+    
+    const dni = document.getElementById('inDni').value.trim();
+    const pers = document.getElementById('inDatosPers').value.trim();
+    document.getElementById('outPers').innerText = [dni ? "DNI: " + dni : "", pers].filter(Boolean).join(" | ") || "DNI | Datos Personales";
+
+    document.getElementById('outSobreMi').innerText = document.getElementById('inSobreMi').value.trim() || "Resumen de perfil...";
+    document.getElementById('outExp').innerText = document.getElementById('inExp').value.trim() || "Detalle de empleos...";
+    document.getElementById('outEdu').innerText = document.getElementById('inEdu').value.trim() || "Formación académica...";
+    document.getElementById('outHab').innerText = document.getElementById('inHab').value.trim() || "Conocimientos técnicos...";
+    document.getElementById('outRef').innerText = document.getElementById('inRef').value.trim() || "Referencias...";
+  }
+
+  // DESCARGA IMAGEN
+  function guardarImagen() {
+    sincronizar();
+    const hoja = document.getElementById('hojaCv');
+    html2canvas(hoja, { scale: 2, useCORS: true }).then(canvas => {
+      const a = document.createElement('a');
+      a.download = 'Mi_CV_Nexus.jpg';
+      a.href = canvas.toDataURL('image/jpeg', 0.95);
+      a.click();
+    });
+  }
+
+  // DESCARGA PDF
+  function guardarPDF() {
+    sincronizar();
+    const hoja = document.getElementById('hojaCv');
+    html2canvas(hoja, { scale: 2, useCORS: true }).then(canvas => {
+      const img = canvas.toDataURL('image/jpeg', 0.95);
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <html>
+          <head><title>CV Nexus Studio</title></head>
+          <body style="margin:0; display:flex; justify-content:center; align-items:center; height:100vh;">
+            <img src="${img}" style="max-width:100%; height:auto;" onload="window.print();window.close();"/>
+          </body>
+        </html>
+      `);
+      win.document.close();
+    });
+  }
+
+  // WHATSAPP
+  function prepararWhatsApp() {
+    const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
+    const puest = document.getElementById('inPuesto').value.trim() || "";
+    const txt = `Hola, te comparto mi CV:\n\n👤 *${nom}*\n💼 *Puesto:* ${puest}\n\nGenerado desde CV Nexus Studio.`;
+    document.getElementById('btnWsp').href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(txt);
+  }
+</script>
+</body>
+</html>
