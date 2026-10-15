@@ -135,50 +135,83 @@
 
     textarea { resize: vertical; min-height: 55px; }
 
+    /* MICRÓFONOS DISCRETOS Y ELEGANTES */
     .btn-mic {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 0 12px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid var(--border-color);
+      padding: 0 10px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-mic:hover {
+      background: #e2e8f0;
     }
 
     .btn-mic.listening {
-      background: #22c55e;
+      background: #dcfce7;
+      color: #166534;
+      border-color: #86efac;
     }
 
-    /* MÓDULO DE FOTO */
+    /* MÓDULO DE FOTO MODERNO Y COMPACTO */
     .photo-box {
-      background: #f1f5f9;
-      border: 2px dashed #cbd5e1;
-      padding: 12px;
-      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px;
+      border-radius: 10px;
       text-align: center;
       margin-bottom: 16px;
     }
 
-    #videoCam { width: 100%; max-width: 150px; border-radius: 8px; display: none; margin: 8px auto; }
-    #previewFoto { width: 85px; height: 85px; object-fit: cover; margin: 8px auto; display: block; }
+    #videoCam { width: 100%; max-width: 140px; border-radius: 8px; display: none; margin: 8px auto; }
+    #previewFoto { width: 80px; height: 80px; object-fit: cover; margin: 8px auto; display: block; }
     .shape-circle { border-radius: 50%; }
     .shape-square { border-radius: 8px; }
-    .shape-rect { border-radius: 2px; width: 85px; height: 105px !important; }
+    .shape-rect { border-radius: 2px; width: 80px; height: 100px !important; }
 
-    .btn-action {
-      background: var(--primary-color);
-      color: white;
-      border: none;
+    .photo-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .btn-photo-icon {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid var(--border-color);
       padding: 8px 12px;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
       font-size: 12px;
-      width: 100%;
-      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.15s ease;
+    }
+
+    .btn-photo-icon:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    /* PALETA GOOGLE STUDIO PARA COLORES */
+    .palette-box {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
 
     /* ESTILOS DE LA HOJA DE CV PREVIA */
@@ -302,24 +335,25 @@
       ✅ ¡Pago Confirmado! Se removió la marca de agua y las descargas están listas.
     </div>
 
-    <!-- CONFIGURACIÓN DE FOTO -->
+    <!-- MÓDULO DE FOTO COMPACTO Y MODERNO -->
     <div class="photo-box">
-      <label style="font-weight:bold; font-size:12px;">📷 Foto de Perfil</label>
+      <label style="font-weight:bold; font-size:12px; color:#475569; display:block; margin-bottom:6px;">📷 Foto de Perfil</label>
       <video id="videoCam" autoplay playsinline></video>
       <img id="previewFoto" class="shape-circle" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><circle cx='40' cy='40' r='40' fill='%23cbd5e1'/></svg>" alt="Foto">
       <canvas id="canvasCam" style="display:none;"></canvas>
       
-      <div style="display:flex; gap:6px; margin-top:6px;">
-        <button class="btn-action" id="btnCam" onclick="iniciarCamara()">📷 Encender Cámara</button>
-        <button class="btn-action" id="btnCap" onclick="tomarFoto()" style="display:none; background:#d97706;">📸 Tomar Foto</button>
+      <div class="photo-actions">
+        <button class="btn-photo-icon" id="btnCam" onclick="iniciarCamara()">📷 Cámara</button>
+        <button class="btn-photo-icon" id="btnCap" onclick="tomarFoto()" style="display:none; background:#d97706; color:white;">📸 Capturar</button>
+        
+        <!-- Input oculto para archivo -->
+        <input type="file" id="inputSubirFoto" accept="image/*" style="display: none;" onchange="cargarFotoArchivo(event)">
+        <button class="btn-photo-icon" type="button" onclick="document.getElementById('inputSubirFoto').click()">📁 Galería</button>
       </div>
       
-      <input type="file" id="inputSubirFoto" accept="image/*" style="display: none;" onchange="cargarFotoArchivo(event)">
-      <button class="btn-action" type="button" onclick="document.getElementById('inputSubirFoto').click()" style="margin-top: 6px; background-color: #6c757d;">📁 Subir desde archivo</button>
-      
-      <div style="margin-top:8px; display:flex; gap:8px; align-items:center; justify-content:center;">
-        <label style="font-size:11px; margin:0;">Formato del Marco:</label>
-        <select id="selFormatoFoto" style="width:auto; padding:4px;" onchange="actualizarEstiloFoto()">
+      <div style="margin-top:10px; display:flex; gap:6px; align-items:center; justify-content:center;">
+        <label style="font-size:11px; margin:0; color:#64748b;">Marco:</label>
+        <select id="selFormatoFoto" style="width:auto; padding:3px 6px; font-size:11px;" onchange="actualizarEstiloFoto()">
           <option value="shape-circle">Redonda</option>
           <option value="shape-square">Cuadrada</option>
           <option value="shape-rect">Rectangular</option>
@@ -327,25 +361,26 @@
       </div>
     </div>
 
-  <!-- CONFIGURACIÓN DE COLORES -->
-    <div class="field-group" style="background:#f1f5f9; padding:8px; border-radius:6px;">
-      <label>🎨 Estilo y Color del CV</label>
-      <select id="selColor" onchange="cambiarColorTema()">
-        <option value="#1e3a8a">Azul Corporativo</option>
-        <option value="#0f766e">Verde Petróleo</option>
-        <option value="#b91c1c">Rojo Ejecutivo</option>
-        <option value="#4338ca">Índigo Moderno</option>
-        <option value="#334155">Gris Oscuro Elegante</option>
-        <option value="#b45309">Dorado Ejecutivo (Nuevo)</option>
-        <option value="#7c3aed">Violeta Tech (Nuevo)</option>
+    <!-- PALETA GOOGLE STUDIO PARA COLORES -->
+    <div class="palette-box">
+      <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">🎨 Estilo y Color del CV</label>
+      <select id="selColor" onchange="cambiarColorTema()" style="background:#f8fafc; font-weight:500;">
+        <option value="#1e3a8a">🔵 Azul Corporativo</option>
+        <option value="#0f766e">🟢 Verde Petróleo</option>
+        <option value="#b91c1c">🔴 Rojo Ejecutivo</option>
+        <option value="#4338ca">🟣 Índigo Moderno</option>
+        <option value="#334155">⚫ Gris Oscuro Elegante</option>
+        <option value="#b45309">🟠 Dorado Ejecutivo</option>
+        <option value="#7c3aed">🟣 Violeta Tech</option>
       </select>
-    </div> 
+    </div>
+
     <!-- CAMPOS FORMULARIO INDIVIDUALES -->
     <div class="field-group">
       <label>Nombre y Apellido</label>
       <div class="field-row">
         <input type="text" id="inNombre" placeholder="Ej: Noemí Vargas" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inNombre', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inNombre', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -353,7 +388,7 @@
       <label>DNI / Documento</label>
       <div class="field-row">
         <input type="text" id="inDni" placeholder="Ej: 23.456.789" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inDni', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inDni', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -361,7 +396,7 @@
       <label>Puesto Objetivo / Titular</label>
       <div class="field-row">
         <input type="text" id="inPuesto" placeholder="Ej: Supervisora Logística / Atención al Cliente" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inPuesto', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inPuesto', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -369,7 +404,7 @@
       <label>Teléfono de Contacto</label>
       <div class="field-row">
         <input type="text" id="inTel" placeholder="Ej: +54 11 1234-5678" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inTel', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inTel', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -377,7 +412,7 @@
       <label>Correo Electrónico</label>
       <div class="field-row">
         <input type="email" id="inEmail" placeholder="Ej: correo@ejemplo.com" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inEmail', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inEmail', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -385,7 +420,7 @@
       <label>Dirección / Ciudad / Barrio</label>
       <div class="field-row">
         <input type="text" id="inDir" placeholder="Ej: CABA, Buenos Aires" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inDir', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inDir', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -393,7 +428,7 @@
       <label>Fecha de Nacimiento / Nacionalidad / Estado Civil</label>
       <div class="field-row">
         <input type="text" id="inDatosPers" placeholder="Ej: 14/10/1972 | Argentina | Soltera" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inDatosPers', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inDatosPers', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -401,7 +436,7 @@
       <label>Sobre Mí / Perfil Profesional</label>
       <div class="field-row">
         <textarea id="inSobreMi" placeholder="Dictá o escribí un resumen breve sobre tus fortalezas..." oninput="sincronizar()"></textarea>
-        <button class="btn-mic" onclick="toggleDictado('inSobreMi', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inSobreMi', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -409,7 +444,7 @@
       <label>Experiencia Laboral</label>
       <div class="field-row">
         <textarea id="inExp" placeholder="Detallá puestos, empresas, fechas y tareas desempeñadas..." oninput="sincronizar()"></textarea>
-        <button class="btn-mic" onclick="toggleDictado('inExp', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inExp', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -417,7 +452,7 @@
       <label>Educación y Cursos</label>
       <div class="field-row">
         <textarea id="inEdu" placeholder="Estudios secundarios, terciarios o capacitaciones..." oninput="sincronizar()"></textarea>
-        <button class="btn-mic" onclick="toggleDictado('inEdu', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inEdu', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -425,7 +460,7 @@
       <label>Habilidades y Manejo de Herramientas</label>
       <div class="field-row">
         <input type="text" id="inHab" placeholder="Ej: Manejo de Caja, Excel, Atención B2B, Sistemas POS" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inHab', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inHab', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -433,7 +468,7 @@
       <label>Referencias Laborales</label>
       <div class="field-row">
         <input type="text" id="inRef" placeholder="Ej: Nombre del supervisor - Teléfono" oninput="sincronizar()">
-        <button class="btn-mic" onclick="toggleDictado('inRef', this)">🎙️</button>
+        <button class="btn-mic" onclick="toggleDictado('inRef', this)" title="Dictar por voz">🎙️</button>
       </div>
     </div>
 
@@ -470,7 +505,7 @@
       <p class="cv-sec-body" id="outRef">Referencias personales / laborales...</p>
     </div>
 
-    <!-- BOTONES MINIMALISTAS Y PROLIJOS -->
+    <!-- BOTONES DE EXPORTACIÓN MINIMALISTAS -->
     <div class="export-btns">
       <button class="btn-exp btn-exp-img" onclick="guardarImagen()" title="Guardar Imagen JPG">💾 JPG</button>
       <button class="btn-exp btn-exp-pdf" onclick="guardarPDF()" title="Descargar PDF">📄 PDF</button>
@@ -504,7 +539,7 @@
   function cambiarColorTema() {
     const col = document.getElementById('selColor').value;
     document.documentElement.style.setProperty('--primary-color', col);
-    document.documentElement.style.setProperty('--cv-bg-tint', col + '0D'); // Genera un tinte del 5% de opacidad para el fondo
+    document.documentElement.style.setProperty('--cv-bg-tint', col + '0D'); 
     document.getElementById('cvHeader').style.borderColor = col;
     document.getElementById('cvFoto').style.borderColor = col;
   }
@@ -526,7 +561,7 @@
       video.style.display = 'block';
       document.getElementById('previewFoto').style.display = 'none';
       document.getElementById('btnCam').style.display = 'none';
-      document.getElementById('btnCap').style.display = 'block';
+      document.getElementById('btnCap').style.display = 'inline-flex';
     } catch (e) { alert("Permití el acceso a la cámara para tomar la foto."); }
   }
 
@@ -565,8 +600,8 @@
     if (streamVideo) streamVideo.getTracks().forEach(t => t.stop());
     
     document.getElementById('btnCap').style.display = 'none';
-    document.getElementById('btnCam').style.display = 'block';
-    document.getElementById('btnCam').innerText = "🔄 Cambiar Foto";
+    document.getElementById('btnCam').style.display = 'inline-flex';
+    document.getElementById('btnCam').innerHTML = "🔄 Cambiar";
   }
 
   // DICTADO POR VOZ
@@ -643,7 +678,7 @@
     });
   }
 
-  // COMPARTIR NATIVO / WHATSAPP CORREGIDO Y SEGURO
+  // COMPARTIR NATIVO / WHATSAPP
   async function prepararWhatsApp() {
     sincronizar();
     const hoja = document.getElementById('hojaCv');
@@ -672,13 +707,11 @@
                 }
             }
         } else {
-            // Plan B de respaldo para PC o navegadores de escritorio
             const enlace = document.createElement('a');
             enlace.href = URL.createObjectURL(blob);
             enlace.download = 'CV_Developer_Strategy.jpg';
             enlace.click();
             
-            // Abrir también enlace de texto directo a WhatsApp por si acaso
             const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
             const texto = "Hola, te comparto mi CV:\n👤 " + nom + "\n¡Miralo desde mi plataforma Developer Strategy!";
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(texto), '_blank');
