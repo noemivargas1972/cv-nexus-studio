@@ -192,7 +192,6 @@
       margin-top: 10px;
     }
 
-    /* BOTONES UNIFICADOS Y SUAVES ESTILO CANVA */
     .btn-photo-canva {
       background: #ea580c;
       color: white;
@@ -340,14 +339,15 @@
       ✅ ¡Pago Confirmado! Se removió la marca de agua y las descargas están listas.
     </div>
 
-    <!-- FOTO DE PERFIL (LIMPIO, SIN TÍTULO SUPERIOR FEO) -->
+    <!-- FOTO DE PERFIL -->
     <div class="photo-box">
       <video id="videoCam" autoplay playsinline></video>
       <img id="previewFoto" style="border-radius:50%;" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><circle cx='40' cy='40' r='40' fill='%23cbd5e1'/></svg>" alt="Foto">
       <canvas id="canvasCam" style="display:none;"></canvas>
       
       <div class="photo-actions">
-        <button class="btn-photo-canva" id="btnCam" onclick="iniciarCamara()">📷 Capturar</button>
+        <!-- BOTÓN INTELIGENTE: CAMBIA ENTRE ACTIVAR CÁMARA Y SACAR LA FOTO -->
+        <button class="btn-photo-canva" id="btnCam" onclick="manejarCamara()">📷 Capturar</button>
         
         <input type="file" id="inputSubirFoto" accept="image/*" style="display: none;" onchange="cargarFotoArchivo(event)">
         <button class="btn-photo-canva" type="button" onclick="document.getElementById('inputSubirFoto').click()">🖼️ Galería</button>
@@ -519,6 +519,7 @@
 <script>
   let fotoUrl = "";
   let streamVideo = null;
+  let camaraActiva = false;
 
   window.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
@@ -575,15 +576,44 @@
     }
   }
 
-  async function iniciarCamara() {
-    try {
-      const video = document.getElementById('videoCam');
-      streamVideo = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = streamVideo;
-      video.style.display = 'block';
-      document.getElementById('previewFoto').style.display = 'none';
-      document.getElementById('btnCam').style.display = 'none';
-    } catch (e) { alert("Permití el acceso a la cámara para tomar la foto."); }
+  // BOTÓN INTELIGENTE QUE MANEJA CÁMARA Y CAPTURA
+  async function manejarCamara() {
+    const video = document.getElementById('videoCam');
+    const btn = document.getElementById('btnCam');
+
+    if (!camaraActiva) {
+      try {
+        streamVideo = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = streamVideo;
+        video.style.display = 'block';
+        document.getElementById('previewFoto').style.display = 'none';
+        
+        btn.innerHTML = "📸 Sacar Foto";
+        camaraActiva = true;
+      } catch (e) { 
+        alert("Permití el acceso a la cámara para tomar la foto."); 
+      }
+    } else {
+      // Tomar la foto
+      const canvas = document.getElementById('canvasCam');
+      canvas.width = video.videoWidth || 300;
+      canvas.height = video.videoHeight || 300;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      fotoUrl = canvas.toDataURL('image/jpeg', 0.9);
+      document.getElementById('previewFoto').src = fotoUrl;
+      document.getElementById('cvFoto').src = fotoUrl;
+      
+      document.getElementById('previewFoto').style.display = 'block';
+      video.style.display = 'none';
+      
+      if (streamVideo) {
+        streamVideo.getTracks().forEach(t => t.stop());
+      }
+      
+      btn.innerHTML = "📷 Capturar";
+      camaraActiva = false;
+    }
   }
 
   function cargarFotoArchivo(event) {
@@ -599,6 +629,12 @@
             imgPrev.style.display = 'block';
             const video = document.getElementById('videoCam');
             if (video) video.style.display = 'none';
+            
+            if (camaraActiva && streamVideo) {
+              streamVideo.getTracks().forEach(t => t.stop());
+              camaraActiva = false;
+              document.getElementById('btnCam').innerHTML = "📷 Capturar";
+            }
         };
         lector.readAsDataURL(archivo);
     }
