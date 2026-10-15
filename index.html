@@ -634,21 +634,21 @@ function cargarFotoArchivo(event) {
       win.document.close();
     });
   }
-// WHATSAPP / COMPARTIR DIRECTO (MODO SEGURO)
+// WHATSAPP / COMPARTIR DIRECTO (SIMPLE Y SEGURO)
 function prepararWhatsApp() {
-    const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
-    const puest = document.getElementById('inPuest').value.trim() || "";
+    // Obtenemos los valores de los inputs de forma segura
+    const inputNombre = document.getElementById('inNombre');
+    const inputPuesto = document.getElementById('inPuest');
     
+    const nom = inputNombre ? inputNombre.value.trim() : "Mi CV";
+    const puest = inputPuesto ? inputPuesto.value.trim() : "";
+    
+    // Armamos el texto
     const texto = Hola, te comparto mi CV:\n\n👤 Nombre: ${nom}\n💼 Puesto: ${puest}\n\n¡Miralo desde mi plataforma Developer Strategy!;
     
+    // Abrimos WhatsApp directamente
     const urlWsp = https://api.whatsapp.com/send?text=${encodeURIComponent(texto)};
-    
-    const linkTemp = document.createElement('a');
-    linkTemp.href = urlWsp;
-    linkTemp.target = '_blank';
-    document.body.appendChild(linkTemp);
-    linkTemp.click();
-    document.body.removeChild(linkTemp);
+    window.open(urlWsp, '_blank');
 }
 </script>
 </body>
