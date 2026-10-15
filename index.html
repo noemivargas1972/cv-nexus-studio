@@ -482,8 +482,7 @@
         <div class="cv-header-text">
           <h2 id="outNombre">Nombre y Apellido</h2>
           <h4 id="outPuesto">Puesto / Titular</h4>
-          <p id="outContacto1">Teléfono | Correo</p>
-          <p id="outContacto2">Ubicación</p>
+          <p id="outContacto">Teléfono | Correo | Ubicación</p>
           <p id="outPers">DNI | Datos Personales</p>
         </div>
       </div>
@@ -631,29 +630,59 @@
     }
   }
 
-  // DICTADO POR VOZ
-  let recs = {}, activo = null;
-  function toggleDictado(id, btn) {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { alert("Usa Google Chrome para dictar por voz."); return; }
-    
-    if (activo === id) { recs[id].stop(); activo = null; btn.classList.remove('listening'); btn.innerText = '🎙️'; return; }
-    if (activo && recs[activo]) { recs[activo].stop(); document.querySelectorAll('.btn-mic').forEach(b => { b.classList.remove('listening'); b.innerText = '🎙️'; }); }
-    
-    const r = new SR(); r.lang = 'es-AR'; r.continuous = true; r.interimResults = true;
-    const target = document.getElementById(id); let valIni = target.value;
-    
-    r.onresult = (e) => {
-      let t = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) { t += e.results[i][0].transcript; }
-      target.value = (valIni ? valIni + ' ' : '') + t;
+  // DICTADO ORIGINAL EN TIEMPO REAL (INTACTO Y VELOZ)
+  let reconocimientos = {};
+  function toggleDictado(idCampo, btn) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Tu navegador no soporta dictado por voz. Usá Google Chrome.");
+      return;
+    }
+
+    if (reconocimientos[idCampo]) {
+      reconocimientos[idCampo].stop();
+      reconocimientos[idCampo] = null;
+      btn.classList.remove('listening');
+      btn.innerText = "🎙️";
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-AR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    const campo = document.getElementById(idCampo);
+    let valorBase = campo.value;
+
+    recognition.onresult = (event) => {
+      let textoTranscrito = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        textoTranscrito += event.results[i][0].transcript;
+      }
+      campo.value = (valorBase ? valorBase + ' ' : '') + textoTranscrito;
       sincronizar();
     };
-    r.onend = () => { if (activo === id) { btn.classList.remove('listening'); btn.innerText = '🎙️'; activo = null; } };
-    r.start(); recs[id] = r; activo = id; btn.classList.add('listening'); btn.innerText = '⏹️';
+
+    recognition.onerror = () => {
+      btn.classList.remove('listening');
+      btn.innerText = "🎙️";
+      reconocimientos[idCampo] = null;
+    };
+
+    recognition.onend = () => {
+      btn.classList.remove('listening');
+      btn.innerText = "🎙️";
+      reconocimientos[idCampo] = null;
+    };
+
+    recognition.start();
+    reconocimientos[idCampo] = recognition;
+    btn.classList.add('listening');
+    btn.innerText = "⏹️";
   }
 
-  // SINCRONIZACIÓN ORDENADA
+  // SINCRONIZACIÓN LIMPIA Y CLARA
   function sincronizar() {
     document.getElementById('outNombre').innerText = document.getElementById('inNombre').value.trim() || "Nombre y Apellido";
     
@@ -662,11 +691,9 @@
     
     const tel = document.getElementById('inTel').value.trim();
     const email = document.getElementById('inEmail').value.trim();
-    document.getElementById('outContacto1').innerText = [tel ? "Tel: " + tel : "", email].filter(Boolean).join(" | ") || "Teléfono | Correo";
-    
     const dir = document.getElementById('inDir').value.trim();
-    document.getElementById('outContacto2').innerText = dir || "Ubicación";
-
+    document.getElementById('outContacto').innerText = [tel ? "Tel: " + tel : "", email, dir].filter(Boolean).join(" | ") || "Teléfono | Correo | Ubicación";
+    
     const dni = document.getElementById('inDni').value.trim();
     const pers = document.getElementById('inDatosPers').value.trim();
     document.getElementById('outPers').innerText = [dni ? "DNI: " + dni : "", pers].filter(Boolean).join(" | ") || "DNI | Datos Personales";
