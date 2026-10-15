@@ -12,6 +12,7 @@
       --card-bg: #ffffff;
       --border-color: #cbd5e1;
       --text-main: #1e293b;
+      --cv-bg-tint: #f8fafc;
     }
 
     * { box-sizing: border-box; }
@@ -182,7 +183,7 @@
 
     /* ESTILOS DE LA HOJA DE CV PREVIA */
     .cv-paper {
-      background: white;
+      background: var(--cv-bg-tint);
       width: 100%;
       max-width: 480px;
       padding: 24px;
@@ -190,6 +191,7 @@
       border-radius: 4px;
       position: relative;
       overflow: hidden;
+      transition: background-color 0.3s ease;
     }
 
     /* MARCA DE AGUA EN DIAGONAL */
@@ -244,10 +246,10 @@
       margin: 0;
     }
 
-    /* BARRA DE EXPORTACIÓN */
+    /* BARRA DE EXPORTACIÓN MINIMALISTA */
     .export-btns {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin-top: 14px;
       flex-wrap: wrap;
       justify-content: center;
@@ -256,7 +258,7 @@
     .btn-exp {
       border: none;
       padding: 8px 12px;
-      border-radius: 6px;
+      border-radius: 8px;
       color: white;
       font-size: 12px;
       font-weight: bold;
@@ -264,8 +266,12 @@
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.1s ease;
     }
+
+    .btn-exp:active { transform: scale(0.97); }
 
     .btn-exp-img { background: #10b981; }
     .btn-exp-pdf { background: #0284c7; }
@@ -307,11 +313,10 @@
         <button class="btn-action" id="btnCam" onclick="iniciarCamara()">📷 Encender Cámara</button>
         <button class="btn-action" id="btnCap" onclick="tomarFoto()" style="display:none; background:#d97706;">📸 Tomar Foto</button>
       </div>
-<!-- Input oculto para subir foto desde archivos/galería -->
-    <input type="file" id="inputSubirFoto" accept="image/*" style="display: none;" onchange="cargarFotoArchivo(event)">
-    
-    <!-- Botón visible para elegir archivo -->
-    <button class="btn-action" type="button" onclick="document.getElementById('inputSubirFoto').click()" style="margin-top: 6px; background-color: #6c757d;">📁 Subir desde archivo</button>
+      
+      <input type="file" id="inputSubirFoto" accept="image/*" style="display: none;" onchange="cargarFotoArchivo(event)">
+      <button class="btn-action" type="button" onclick="document.getElementById('inputSubirFoto').click()" style="margin-top: 6px; background-color: #6c757d;">📁 Subir desde archivo</button>
+      
       <div style="margin-top:8px; display:flex; gap:8px; align-items:center; justify-content:center;">
         <label style="font-size:11px; margin:0;">Formato del Marco:</label>
         <select id="selFormatoFoto" style="width:auto; padding:4px;" onchange="actualizarEstiloFoto()">
@@ -464,10 +469,11 @@
       <p class="cv-sec-body" id="outRef">Referencias personales / laborales...</p>
     </div>
 
+    <!-- BOTONES MINIMALISTAS Y PROLIJOS -->
     <div class="export-btns">
-      <button class="btn-exp btn-exp-img" onclick="guardarImagen()">💾 Guardar Imagen (JPG)</button>
-      <button class="btn-exp btn-exp-pdf" onclick="guardarPDF()">📄 Descargar PDF</button>
- <button onclick="prepararWhatsApp()">💬 Enviar a WhatsApp</button>
+      <button class="btn-exp btn-exp-img" onclick="guardarImagen()" title="Guardar Imagen JPG">💾 JPG</button>
+      <button class="btn-exp btn-exp-pdf" onclick="guardarPDF()" title="Descargar PDF">📄 PDF</button>
+      <button class="btn-exp btn-exp-wsp" onclick="prepararWhatsApp()" title="Compartir / WhatsApp">💬 Compartir</button>
     </div>
   </div>
 
@@ -486,16 +492,18 @@
       document.getElementById('pagoBanner').style.display = 'none';
       document.getElementById('avisoPagoOk').style.display = 'block';
     }
+    cambiarColorTema();
   });
 
   function irAPagar() {
-    // REEMPLAZAR ESTE ENLACE POR TU LINK REAL DE MERCADO PAGO
     window.location.href = "https://mpago.li/1YZVG9u";
   }
 
+  // CAMBIO DE TEMA Y TONO SUAVE DE FONDO AUTOMÁTICO
   function cambiarColorTema() {
     const col = document.getElementById('selColor').value;
     document.documentElement.style.setProperty('--primary-color', col);
+    document.documentElement.style.setProperty('--cv-bg-tint', col + '0D'); // Genera un tinte del 5% de opacidad para el fondo
     document.getElementById('cvHeader').style.borderColor = col;
     document.getElementById('cvFoto').style.borderColor = col;
   }
@@ -520,19 +528,17 @@
       document.getElementById('btnCap').style.display = 'block';
     } catch (e) { alert("Permití el acceso a la cámara para tomar la foto."); }
   }
-// Función para cargar la foto elegida desde los archivos del dispositivo
-function cargarFotoArchivo(event) {
+
+  function cargarFotoArchivo(event) {
     const archivo = event.target.files[0];
     if (archivo) {
         const lector = new FileReader();
         lector.onload = function(e) {
-            // Mostramos la imagen seleccionada en el visor del CV
             const imgCv = document.getElementById('previewFoto') || document.getElementById('fotoCv');
             if (imgCv) {
                 imgCv.src = e.target.result;
                 imgCv.style.display = 'block';
             }
-            // Si hay un elemento de video de la cámara abierto, lo ocultamos
             const video = document.getElementById('videoCam');
             if (video) {
                 video.style.display = 'none';
@@ -540,7 +546,8 @@ function cargarFotoArchivo(event) {
         };
         lector.readAsDataURL(archivo);
     }
-}
+  }
+
   function tomarFoto() {
     const video = document.getElementById('videoCam');
     const canvas = document.getElementById('canvasCam');
@@ -610,7 +617,7 @@ function cargarFotoArchivo(event) {
     const hoja = document.getElementById('hojaCv');
     html2canvas(hoja, { scale: 2, useCORS: true }).then(canvas => {
       const a = document.createElement('a');
-      a.download = 'Mi_CV_Nexus.jpg';
+      a.download = 'CV_Developer_Strategy.jpg';
       a.href = canvas.toDataURL('image/jpeg', 0.95);
       a.click();
     });
@@ -634,23 +641,54 @@ function cargarFotoArchivo(event) {
       win.document.close();
     });
   }
-// WHATSAPP / COMPARTIR DIRECTO (SIMPLE Y SEGURO)
-// WHATSAPP / COMPARTIR DIRECTO (SIMPLE Y SEGURO)
-function prepararWhatsApp() {
-    // Obtenemos los valores de los inputs de forma segura
-    const inputNombre = document.getElementById('inNombre');
-    const inputPuesto = document.getElementById('inPuest');
+
+  // COMPARTIR NATIVO / WHATSAPP CORREGIDO Y SEGURO
+  async function prepararWhatsApp() {
+    sincronizar();
+    const hoja = document.getElementById('hojaCv');
     
-    const nom = inputNombre ? inputNombre.value.trim() : "Mi CV";
-    const puest = inputPuesto ? inputPuesto.value.trim() : "";
-    
-    // Armamos el texto completo sin cortes
-    const texto = "Hola, te comparto mi CV:\n\n👤 Nombre: " + nom + "\n💼 Puesto: " + puest + "\n\n¡Miralo desde mi plataforma Developer Strategy!";
-    
-    // Abrimos WhatsApp directamente
-    const urlWsp = "https://api.whatsapp.com/send?text=" + encodeURIComponent(texto);
-    window.open(urlWsp, '_blank');
-}
+    try {
+      const canvas = await html2canvas(hoja, { scale: 2, useCORS: true });
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+            alert("No se pudo generar la imagen del CV.");
+            return;
+        }
+        
+        const archivo = new File([blob], "CV_Developer_Strategy.jpg", { type: "image/jpeg" });
+        
+        if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+            try {
+                await navigator.share({
+                    title: 'Mi CV - Developer Strategy',
+                    text: 'Hola, te comparto mi CV profesional.',
+                    files: [archivo]
+                });
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.log("Error al compartir:", error);
+                }
+            }
+        } else {
+            // Plan B de respaldo para PC o navegadores de escritorio
+            const enlace = document.createElement('a');
+            enlace.href = URL.createObjectURL(blob);
+            enlace.download = 'CV_Developer_Strategy.jpg';
+            enlace.click();
+            
+            // Abrir también enlace de texto directo a WhatsApp por si acaso
+            const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
+            const texto = "Hola, te comparto mi CV:\n👤 " + nom + "\n¡Miralo desde mi plataforma Developer Strategy!";
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(texto), '_blank');
+        }
+      }, 'image/jpeg', 0.95);
+      
+    } catch (err) {
+      console.error("Error al preparar el CV:", err);
+      alert("Ocurrió un error al preparar el CV para compartir.");
+    }
+  }
 </script>
 </body>
 </html>
