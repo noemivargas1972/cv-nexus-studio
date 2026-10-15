@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CV </title>Developer Strategy
+  <title>Developer Strategy - Logística estratégica y desarrollo profesional</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -307,7 +307,11 @@
         <button class="btn-action" id="btnCam" onclick="iniciarCamara()">📷 Encender Cámara</button>
         <button class="btn-action" id="btnCap" onclick="tomarFoto()" style="display:none; background:#d97706;">📸 Tomar Foto</button>
       </div>
-
+<!-- Input oculto para subir foto desde archivos/galería -->
+    <input type="file" id="inputSubirFoto" accept="image/*" style="display: none;" onchange="cargarFotoArchivo(event)">
+    
+    <!-- Botón visible para elegir archivo -->
+    <button class="btn-action" type="button" onclick="document.getElementById('inputSubirFoto').click()" style="margin-top: 6px; background-color: #6c757d;">📁 Subir desde archivo</button>
       <div style="margin-top:8px; display:flex; gap:8px; align-items:center; justify-content:center;">
         <label style="font-size:11px; margin:0;">Formato del Marco:</label>
         <select id="selFormatoFoto" style="width:auto; padding:4px;" onchange="actualizarEstiloFoto()">
@@ -516,7 +520,27 @@
       document.getElementById('btnCap').style.display = 'block';
     } catch (e) { alert("Permití el acceso a la cámara para tomar la foto."); }
   }
-
+// Función para cargar la foto elegida desde los archivos del dispositivo
+function cargarFotoArchivo(event) {
+    const archivo = event.target.files[0];
+    if (archivo) {
+        const lector = new FileReader();
+        lector.onload = function(e) {
+            // Mostramos la imagen seleccionada en el visor del CV
+            const imgCv = document.getElementById('previewFoto') || document.getElementById('fotoCv');
+            if (imgCv) {
+                imgCv.src = e.target.result;
+                imgCv.style.display = 'block';
+            }
+            // Si hay un elemento de video de la cámara abierto, lo ocultamos
+            const video = document.getElementById('videoCam');
+            if (video) {
+                video.style.display = 'none';
+            }
+        };
+        lector.readAsDataURL(archivo);
+    }
+}
   function tomarFoto() {
     const video = document.getElementById('videoCam');
     const canvas = document.getElementById('canvasCam');
@@ -611,13 +635,58 @@
     });
   }
 
-  // WHATSAPP
-  function prepararWhatsApp() {
-    const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
-    const puest = document.getElementById('inPuesto').value.trim() || "";
-    const txt = `Hola, te comparto mi CV:\n\n👤 *${nom}*\n💼 *Puesto:* ${puest}\n\nGenerado desde CV Nexus Studio.`;
-    document.getElementById('btnWsp').href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(txt);
-  }
+ // WHATSAPP / COMPARTIR NATIVO
+async function prepararWhatsApp() {
+    try {
+        const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
+        const puest = document.getElementById('inPuesto').value.trim() || "";
+        const textoCompartir = `Hola, te comparto mi CV:\n\n👤 *${nom}*\n💼 *Puesto:* ${puest}\n\nGenerado con Developer Strategy`;
+
+        // Buscamos el elemento visual del CV para capturarlo como imagen
+        const cvElement = document.getElementById('cvPreview') || document.querySelector('.cv-preview') || document.body;
+        
+        // Generamos el lienzo con html2canvas
+        const canvas = await html2canvas(cvElement, { scale: 2, useCORS: true });
+        
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], "CV_Developer_Strategy.png", { type: "image/png" });
+            
+            // Verificamos si el navegador soporta compartir archivos nativamente
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: 'Mi CV - Developer Strategy',
+                        text: textoCompartir,
+                        files: [file]
+                    });
+                    return;
+                } catch (shareErr) {
+                    if (shareErr.name !== 'AbortError') {
+                        console.log("Error al compartir archivo, usando alternativa...", shareErr);
+                    } else {
+                        return; // Si el usuario canceló, no hacemos nada más
+                    }
+                }
+            }
+            
+            // Plan B: Si no soporta archivos, compartimos texto o abrimos WhatsApp web con el texto
+            if (navigator.share) {
+                await navigator.share({
+                    title: 'Mi CV',
+                    text: textoCompartir
+                });
+            } else {
+                // Fallback clásico si está en una compu vieja sin soporte
+                const urlWsp = `https://api.whatsapp.com/send?text=` + encodeURIComponent(textoCompartir);
+                window.open(urlWsp, '_blank');
+            }
+        }, 'image/png');
+
+    } catch (error) {
+        console.error("Error al preparar el compartir:", error);
+        alert("No se pudo generar la imagen para compartir automáticamente.");
+    }
+}
 </script>
 </body>
 </html>
