@@ -625,7 +625,7 @@ function cargarFotoArchivo(event) {
       const win = window.open('', '_blank');
       win.document.write(`
         <html>
-          <head><title>CV Nexus Studio</title></head>
+          <head><title>CV Developer Strategy</title></head>
           <body style="margin:0; display:flex; justify-content:center; align-items:center; height:100vh;">
             <img src="${img}" style="max-width:100%; height:auto;" onload="window.print();window.close();"/>
           </body>
@@ -634,19 +634,21 @@ function cargarFotoArchivo(event) {
       win.document.close();
     });
   }
-
- // WHATSAPP / COMPARTIR NATIVO
-// WHATSAPP / COMPARTIR DIRECTO
+// WHATSAPP / COMPARTIR DIRECTO (MODO SEGURO)
 function prepararWhatsApp() {
     const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
     const puest = document.getElementById('inPuest').value.trim() || "";
     
-    // Armamos el texto claro para compartir
     const texto = Hola, te comparto mi CV:\n\n👤 Nombre: ${nom}\n💼 Puesto: ${puest}\n\n¡Miralo desde mi plataforma Developer Strategy!;
     
-    // Abrimos directamente el enlace de WhatsApp en una pestaña nueva
     const urlWsp = https://api.whatsapp.com/send?text=${encodeURIComponent(texto)};
-    window.open(urlWsp, '_blank');
+    
+    const linkTemp = document.createElement('a');
+    linkTemp.href = urlWsp;
+    linkTemp.target = '_blank';
+    document.body.appendChild(linkTemp);
+    linkTemp.click();
+    document.body.removeChild(linkTemp);
 }
 </script>
 </body>
