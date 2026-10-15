@@ -631,7 +631,7 @@
     }
   }
 
-  // DICTADO
+  // DICTADO POR VOZ
   let recs = {}, activo = null;
   function toggleDictado(id, btn) {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -653,7 +653,7 @@
     r.start(); recs[id] = r; activo = id; btn.classList.add('listening'); btn.innerText = '⏹️';
   }
 
-  // SINCRONIZACIÓN INTELIGENTE Y ORDENADA DEL ENCABEZADO
+  // SINCRONIZACIÓN ORDENADA
   function sincronizar() {
     document.getElementById('outNombre').innerText = document.getElementById('inNombre').value.trim() || "Nombre y Apellido";
     
@@ -669,7 +669,7 @@
 
     const dni = document.getElementById('inDni').value.trim();
     const pers = document.getElementById('inDatosPers').value.trim();
-    document.getElementById('outPers').innerText = [dni ? "DNI: " + dni : "", pers].filter(Boolean).join(" | ⁠") || "DNI | Datos Personales";
+    document.getElementById('outPers').innerText = [dni ? "DNI: " + dni : "", pers].filter(Boolean).join(" | ") || "DNI | Datos Personales";
 
     document.getElementById('outSobreMi').innerText = document.getElementById('inSobreMi').value.trim() || "Resumen de perfil...";
     document.getElementById('outExp').innerText = document.getElementById('inExp').value.trim() || "Detalle de empleos...";
@@ -732,7 +732,7 @@
             enlace.download = 'CV_Developer_Strategy.jpg';
             enlace.click();
             
-            const nom = document.getElementById('inNombre').value.trim() clarifies || "Mi CV";
+            const nom = document.getElementById('inNombre').value.trim() || "Mi CV";
             const texto = "Hola, te comparto mi CV:\n👤 " + nom + "\n¡Miralo desde mi plataforma Developer Strategy!";
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(texto), '_blank');
         }
