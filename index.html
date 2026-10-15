@@ -170,11 +170,23 @@
       margin-bottom: 16px;
     }
 
-    #videoCam { width: 100%; max-width: 140px; border-radius: 8px; display: none; margin: 8px auto; }
-    #previewFoto { width: 80px; height: 80px; object-fit: cover; margin: 8px auto; display: block; }
-    .shape-circle { border-radius: 50%; }
-    .shape-square { border-radius: 8px; }
-    .shape-rect { border-radius: 2px; width: 80px; height: 100px !important; }
+  #previewFoto { width: 80px; height: 80px; object-fit: cover; margin: 8px auto; display: block; }
+    
+    /* CONTROL EXACTO PARA LA FOTO DEL CV */
+    #cvFoto {
+      width: 75px !important;
+      height: 75px !important;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .shape-circle { border-radius: 50% !important; }
+    .shape-square { border-radius: 8px !important; }
+    .shape-rect { 
+      border-radius: 4px !important; 
+      width: 65px !important; 
+      height: 85px !important; 
+    }
 
     .photo-actions {
       display: flex;
