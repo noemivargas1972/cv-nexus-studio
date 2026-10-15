@@ -483,8 +483,8 @@
           <h2 id="outNombre">Nombre y Apellido</h2>
           <h4 id="outPuesto">Puesto / Titular</h4>
           <p id="outContacto">Teléfono | Correo | Ubicación</p>
-          <p id="outDni">DNI</p>
-          <p id="outPers">Fecha de Nacimiento | Nacionalidad | Estado Civil</p>
+          <p id="outDni">DNI: --</p>
+          <p id="outPers">Fecha Nac. | Nacionalidad | Estado Civil</p>
         </div>
       </div>
 
@@ -631,7 +631,7 @@
     }
   }
 
-  // DICTADO ORIGINAL EN TIEMPO REAL (INTACTO Y VELOZ)
+  // DICTADO ORIGINAL EN TIEMPO REAL
   let reconocimientos = {};
   function toggleDictado(idCampo, btn) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -683,7 +683,7 @@
     btn.innerText = "⏹️";
   }
 
-  // SINCRONIZACIÓN SEPARADA Y LIMPIA
+  // FORMATEADOR AUTOMÁTICO INTELIGENTE PARA FECHA, NACIONALIDAD Y ESTADO CIVIL
   function sincronizar() {
     document.getElementById('outNombre').innerText = document.getElementById('inNombre').value.trim() || "Nombre y Apellido";
     
@@ -695,11 +695,40 @@
     const dir = document.getElementById('inDir').value.trim();
     document.getElementById('outContacto').innerText = [tel ? "Tel: " + tel : "", email, dir].filter(Boolean).join(" | ") || "Teléfono | Correo | Ubicación";
     
+    // DNI EXCLUSIVO
     const dni = document.getElementById('inDni').value.trim();
-    document.getElementById('outDni').innerText = dni ? "DNI: " + dni : "DNI";
+    document.getElementById('outDni').innerText = dni ? "DNI: " + dni : "DNI: --";
 
-    const pers = document.getElementById('inDatosPers').value.trim();
-    document.getElementById('outPers').innerText = pers || "Fecha de Nacimiento | Nacionalidad | Estado Civil";
+    // FORMATEO Mágico AUTOMÁTICO DE DATOS PERSONALES
+    let raw = document.getElementById('inDatosPers').value.trim();
+    if (raw) {
+      let textoLimpio = raw;
+      
+      // Convierte expresiones habladas de fecha (ej: "4 del 7 de 1972" o "4 del 7 del 72") en formato numérico con barras
+      textoLimpio = textoLimpio.replace(/(\d{1,2})\s+(?:del?|de)\s+(\d{1,2})\s+(?:del?|de)\s+(\d{2,4})/gi, (match, d, m, y) => {
+        let dia = d.padStart(2, '0');
+        let mes = m.padStart(2, '0');
+        let anio = y.length === 2 ? (parseInt(y) > 30 ? '19' + y : '20' + y) : y;
+        return `${dia}/${mes}/${anio}`;
+      });
+
+      // Si el usuario dictó palabras de separación o los datos juntos, los estructuramos con barras limpias
+      // Buscamos nacionalidades comunes o estados civiles para separarlos automáticamente si están juntos
+      let cvFormateado = textoLimpio;
+      const terminosClave = ["argentina", "argentino", "uruguaya", "uruguayo", "chilena", "chilena", "venezolana", "venezolano", "soltera", "soltero", "casada", "casado", "divorciada", "divorciado", "viuda", "viudo"];
+      
+      terminosClave.forEach(term => {
+        let regex = new RegExp(`(\\d{2}/\\d{2}/\\d{4})\\s+(${term})`, 'gi');
+        cvFormateado = cvFormateado.replace(regex, '$1 | $2');
+        
+        let regex2 = new RegExp(`(${term})\\s+(soltera|soltero|casada|casado|divorciada|divorciado|viuda|viudo)`, 'gi');
+        cvFormateado = cvFormateado.replace(regex2, '$1 | $2');
+      });
+
+      document.getElementById('outPers').innerText = cvFormateado;
+    } else {
+      document.getElementById('outPers').innerText = "Fecha Nac. | Nacionalidad | Estado Civil";
+    }
 
     document.getElementById('outSobreMi').innerText = document.getElementById('inSobreMi').value.trim() || "Resumen de perfil...";
     document.getElementById('outExp').innerText = document.getElementById('inExp').value.trim() || "Detalle de empleos...";
