@@ -483,7 +483,8 @@
           <h2 id="outNombre">Nombre y Apellido</h2>
           <h4 id="outPuesto">Puesto / Titular</h4>
           <p id="outContacto">Teléfono | Correo | Ubicación</p>
-          <p id="outPers">DNI | Datos Personales</p>
+          <p id="outDni">DNI</p>
+          <p id="outPers">Fecha de Nacimiento | Nacionalidad | Estado Civil</p>
         </div>
       </div>
 
@@ -682,7 +683,7 @@
     btn.innerText = "⏹️";
   }
 
-  // SINCRONIZACIÓN LIMPIA Y CLARA
+  // SINCRONIZACIÓN SEPARADA Y LIMPIA
   function sincronizar() {
     document.getElementById('outNombre').innerText = document.getElementById('inNombre').value.trim() || "Nombre y Apellido";
     
@@ -695,8 +696,10 @@
     document.getElementById('outContacto').innerText = [tel ? "Tel: " + tel : "", email, dir].filter(Boolean).join(" | ") || "Teléfono | Correo | Ubicación";
     
     const dni = document.getElementById('inDni').value.trim();
+    document.getElementById('outDni').innerText = dni ? "DNI: " + dni : "DNI";
+
     const pers = document.getElementById('inDatosPers').value.trim();
-    document.getElementById('outPers').innerText = [dni ? "DNI: " + dni : "", pers].filter(Boolean).join(" | ") || "DNI | Datos Personales";
+    document.getElementById('outPers').innerText = pers || "Fecha de Nacimiento | Nacionalidad | Estado Civil";
 
     document.getElementById('outSobreMi').innerText = document.getElementById('inSobreMi').value.trim() || "Resumen de perfil...";
     document.getElementById('outExp').innerText = document.getElementById('inExp').value.trim() || "Detalle de empleos...";
