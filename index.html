@@ -524,18 +524,61 @@
   let camaraActiva = false;
 
   window.addEventListener('DOMContentLoaded', () => {
+    // 1. CARGAR BORRADOR AUTOMÁTICO (localStorage) AL ABRIR
+    cargarBorrador();
+
+    // 2. VERIFICAR PAGO DESDE LA URL O MEMORIA
     const params = new URLSearchParams(window.location.search);
-    const estado = params.get('pago') || params.get('collection_status');
-    if (estado === 'aprobado' || estado === 'approved') {
+    const estado = params.get('pago') || params.get('status') || params.get('collection_status');
+    
+    if (estado === 'aprobado' || estado === 'approved' || localStorage.getItem('cv_pagado') === 'true') {
       document.getElementById('hojaCv').classList.remove('con-marca');
       document.getElementById('pagoBanner').style.display = 'none';
       document.getElementById('avisoPagoOk').style.display = 'block';
+      localStorage.setItem('cv_pagado', 'true');
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
     cambiarColorTema();
   });
 
   function irAPagar() {
+    // Guardamos los datos antes de ir a pagar por seguridad
+    guardarBorradorEnMemoria();
     window.location.href = "https://mpago.li/1YZVG9u";
+  }
+
+  // --- FUNCIONES DE PERSISTENCIA LOCAL (LOCALSTORAGE) ---
+  const camposIds = ['inNombre', 'inDni', 'inPuesto', 'inTel', 'inEmail', 'inDir', 'inDatosPers', 'inSobreMi', 'inExp', 'inEdu', 'inHab', 'inRef'];
+
+  function guardarBorradorEnMemoria() {
+    const datos = {};
+    camposIds.forEach(id => {
+      datos[id] = document.getElementById(id).value;
+    });
+    datos['fotoUrl'] = fotoUrl;
+    localStorage.setItem('cv_borrador_datos', JSON.stringify(datos));
+  }
+
+  function cargarBorrador() {
+    const guardado = localStorage.getItem('cv_borrador_datos');
+    if (guardado) {
+      try {
+        const datos = JSON.parse(guardado);
+        camposIds.forEach(id => {
+          if (datos[id] !== undefined) {
+            document.getElementById(id).value = datos[id];
+          }
+        });
+        if (datos['fotoUrl']) {
+          fotoUrl = datos['fotoUrl'];
+          document.getElementById('previewFoto').src = fotoUrl;
+          document.getElementById('cvFoto').src = fotoUrl;
+        }
+        sincronizar();
+      } catch (e) {
+        console.error("Error al cargar borrador", e);
+      }
+    }
   }
 
   function cambiarColorTema() {
@@ -609,6 +652,7 @@
       
       btn.innerHTML = "📷 Capturar";
       camaraActiva = false;
+      guardarBorradorEnMemoria();
     }
   }
 
@@ -617,10 +661,11 @@
     if (archivo) {
         const lector = new FileReader();
         lector.onload = function(e) {
+            fotoUrl = e.target.result;
             const imgPrev = document.getElementById('previewFoto');
             const imgCv = document.getElementById('cvFoto');
-            if (imgPrev) imgPrev.src = e.target.result;
-            if (imgCv) imgCv.src = e.target.result;
+            if (imgPrev) imgPrev.src = fotoUrl;
+            if (imgCv) imgCv.src = fotoUrl;
             
             imgPrev.style.display = 'block';
             const video = document.getElementById('videoCam');
@@ -631,6 +676,7 @@
               camaraActiva = false;
               document.getElementById('btnCam').innerHTML = "📷 Capturar";
             }
+            guardarBorradorEnMemoria();
         };
         lector.readAsDataURL(archivo);
     }
@@ -650,6 +696,7 @@
       reconocimientos[idCampo] = null;
       btn.classList.remove('listening');
       btn.innerText = "🎙️";
+      guardarBorradorEnMemoria();
       return;
     }
 
@@ -668,6 +715,7 @@
       }
       campo.value = (valorBase ? valorBase + ' ' : '') + textoTranscrito;
       sincronizar();
+      guardarBorradorEnMemoria();
     };
 
     recognition.onerror = () => {
@@ -680,6 +728,7 @@
       btn.classList.remove('listening');
       btn.innerText = "🎙️";
       reconocimientos[idCampo] = null;
+      guardarBorradorEnMemoria();
     };
 
     recognition.start();
@@ -690,6 +739,9 @@
 
   // SINCRONIZACIÓN Y PARSEO AUTOMÁTICO DE CADA CAMPO
   function sincronizar() {
+    // Guardamos automáticamente cada vez que el usuario escribe
+    guardarBorradorEnMemoria();
+
     document.getElementById('outNombre').innerText = document.getElementById('inNombre').value.trim() || "Nombre y Apellido";
     
     const puesto = document.getElementById('inPuesto').value.trim();
@@ -724,14 +776,12 @@
           return `${dia}/${mStr}/${anio}`;
         });
 
-      // Extraer Fecha (patrón DD/MM/AAAA)
       let matchFecha = txt.match(/\d{1,2}\/\d{1,2}\/\d{2,4}/);
       if (matchFecha) {
         fecNac = matchFecha[0];
         txt = txt.replace(matchFecha[0], "").trim();
       }
 
-      // Extraer Estado Civil
       const estados = ["soltera", "soltero", "casada", "casado", "divorciada", "divorciado", "viuda", "viudo"];
       for (let st of estados) {
         let reg = new RegExp(`\\b${st}\\b`, 'gi');
@@ -742,7 +792,6 @@
         }
       }
 
-      // Lo que queda se asume como Nacionalidad/Origen
       txt = txt.replace(/^[|\-\,\s]+|[|\-\,\s]+$/g, "").trim();
       if (txt) {
         nac = txt.charAt(0).toUpperCase() + txt.slice(1);
